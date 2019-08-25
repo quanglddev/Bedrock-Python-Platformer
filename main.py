@@ -16,7 +16,7 @@ connection = fs()
 db = connection.getFirebaseDB()
 
 # ! Change this
-me = User("qdl24", "Quang Luong")
+me = User("md169", "Melody Davis")
 
 def homepage():
     clear()
@@ -28,8 +28,14 @@ def homepage():
     print("To join a game, type 'join'")
 
 def on_snapshot(doc_snapshot, changes, read_time):
+    clear()
     for doc in doc_snapshot:
-        print(doc.to_dict())
+        try: 
+            print(doc.to_dict()['role'])
+            print(doc.to_dict()['des'])
+            print(doc.to_dict()['alignment'])
+        except:
+            pass
 
 # ! Begin the program
 homepage()
@@ -46,32 +52,39 @@ if len(splitted_user_input) == 3 and 'create' in user_input:
         player_ids.append(newPlayer)
 
     new_game = Game(str(uuid.uuid4()), 'werewolf', player_ids)
+
+    # TODO: Setup cards and listeners
+    allCards = new_game.initializeCards()
+    # print(len(allCards))
+    shuffle(allCards)
+
+    playing_cards = []
+    for i in range(number_of_player):
+        playing_cards.append(allCards[i])
+
+    # print(len(playing_cards))
+    # ! 0-index admin
+    print("Your are a: ", playing_cards[0].name)
+    print("Description: ", playing_cards[0].des)
+    print("Alignment: ", playing_cards[0].alignment)
+
+    for i in range(1, len(playing_cards)):
+        data = {
+            u'role': playing_cards[i].name,
+            u'des': playing_cards[i].des,
+            u'alignment': playing_cards[i].alignment,
+        }
+        db.collection('users').document(player_ids[i]).set(data)
 elif user_input == "join":
     # ! join
     doc_ref = db.collection(u'users').document(me.userID)
-
+    doc_ref.set({
+        u'role': u'waiting...',
+        u'des': u'waiting...',
+        u'alignment': u'waiting...',
+    })
     # Watch the document
     doc_watch = doc_ref.on_snapshot(on_snapshot)
     doc_watch.unsubscribe()
 
 
-# TODO: Setup cards and listeners
-allCards = new_game.initializeCards()
-# print(len(allCards))
-shuffle(allCards)
-
-playing_cards = []
-for i in range(number_of_player):
-    playing_cards.append(allCards[i])
-
-# print(len(playing_cards))
-# ! 0-index admin
-print("Your are a: ", playing_cards[0].name)
-print("Description: ", playing_cards[0].des)
-print("Alignment: ", playing_cards[0].alignment)
-
-for i in range(1, len(playing_cards)):
-    data = {
-        u'role': playing_cards[i].name,
-    }
-    db.collection('users').document(player_ids[i]).set(data)
