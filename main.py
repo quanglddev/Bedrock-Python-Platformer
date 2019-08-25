@@ -28,6 +28,7 @@ def homepage():
     print("To join a game, type 'join'")
 
 def on_snapshot(doc_snapshot, changes, read_time):
+    clear()
     for doc in doc_snapshot:
         print(doc.to_dict())
 
@@ -49,6 +50,10 @@ if len(splitted_user_input) == 3 and 'create' in user_input:
 elif user_input == "join":
     # ! join
     doc_ref = db.collection(u'users').document(me.userID)
+
+    doc_ref.set({
+        u'role': u'waiting...'
+    })
 
     # Watch the document
     doc_watch = doc_ref.on_snapshot(on_snapshot)
