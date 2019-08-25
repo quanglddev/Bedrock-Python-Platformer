@@ -1,50 +1,50 @@
-# import only system from os 
-from os import system, name 
+from Tools.ClearTool import clear
+from Tools.Firebase import Firebase as fs
 
-# define our clear function 
-def clear(): 
-    # for windows 
-    if name == 'nt': 
-        _ = system('cls') 
-  
-    # for mac and linux(here, os.name is 'posix') 
-    else: 
-        _ = system('clear') 
+from backend.User import User
 
-import firebase_admin
-from firebase_admin import credentials
-from firebase_admin import firestore
+from backend.Game import Game
 
-print(firebase_admin.__version__)
+connection = fs()
+db = connection.getFirebaseDB()
 
-cred = credentials.Certificate("serviceAccountKey.json")
-firebase_admin.initialize_app(cred)
+# ! Change this
+me = User("qdl24", "Quang Luong")
 
-db = firestore.client()
-
-# doc_ref = db.collection(u'users').document(u'alovelace')
-# doc_ref.set({
-#     u'first': u'Ada',
-#     u'last': u'Lovelace',
-#     u'born': 1815
-# })
-  
-# users_ref = db.collection(u'users')
-# docs = users_ref.stream()
-
-# for doc in docs:
-#     print(u'{} => {}'.format(doc.id, doc.to_dict()))
-
-def on_snapshot(doc_snapshot, changes, read_time):
+def homepage():
     clear()
-    for doc in doc_snapshot:
-        # print(u'Received document snapshot: {}'.format(doc.id))
-        # print(u'{}'.format(doc.to_dict()['chat']))
-        for chat in doc.to_dict()['chat']:
-            print(chat)
+    print('======================================================')
+    print("======== Welcome to online boardgame platform ========")
+    print("========           You gonna love it          ========")
+    print('======================================================')
+    print("To create a game, type: 'create [game_id] [game_name] [number_of_player]'")
+    print("To join a game, type: 'join [game_id]'")
 
-doc_ref = db.collection(u'chats').document(u'sC0HB4cipYGJcPK4E8N5')
+# ! Begin the program
+while True:
+    homepage()
+    user_input = input("Please enter your wish: ")
+    splitted_user_input = user_input.split()
+    if len(splitted_user_input) == 4 and 'create' in user_input:
+        # ! Create a new game
+        game_id = splitted_user_input[1]
+        game_name = splitted_user_input[2]
+        number_of_player = int(splitted_user_input[3])
 
-# Watch the document
-doc_watch = doc_ref.on_snapshot(on_snapshot)
-doc_watch.unsubscribe()
+        player_ids = [me.userID]
+        for i in range(1, number_of_player):
+            newPlayer = input("Enter a player's id here: ")
+            player_ids.append(newPlayer)
+
+        new_game = Game(game_id, 'werewolf', player_ids)
+    elif len(splitted_user_input) == 2 and 'join' in user_input:
+        # ! Join a new game
+        game_id = splitted_user_input[1]
+    elif user_input == "exit":
+        break
+    else:
+        continue
+    # ! Setup cards and listeners
+
+    # ! Later
+    # connection.activateChat(game_id) 
