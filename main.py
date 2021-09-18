@@ -16,7 +16,7 @@ import pygame
 
 pygame.init() 
 display_surface = pygame.display.set_mode((400, 400)) 
-pygame.display.set_caption('Image') 
+pygame.display.set_caption('Image')
 image = pygame.image.load(r'./Villager.png') 
 
 connection = fs()
